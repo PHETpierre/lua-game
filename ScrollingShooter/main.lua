@@ -4,8 +4,24 @@ canShoot = true
 canShootTimerMax = 0.2
 canShootTimer = canShootTimerMax
 
-bulletImg = nil
+bulletImg = love.graphics.newImage('assets/bullet_blue0001.png'); 
 bullets = {}
+
+createEnnemyTimerMax = 0.4
+createEnnemyTimer = createEnnemyTimerMax
+
+enemyImg = love.graphics.newImage('assets/Aircraft_02.png')
+enemies = {}
+
+function CheckCollision(x1,y1,w1,h1, x2,y2,w2,h2)
+    return x1 < x2+w2 and
+        x2 < x1+w1 and
+        y1 < y2+h2 and
+        y2 < y1+h1
+end
+
+isAlive = true
+score = 0
 
 function love.load(arg)
     player = { x = 200, y = 710, speed = 150, img = nil} 
@@ -33,14 +49,61 @@ function love.update(dt)
         canShoot = true
     end
 
-    if.love.keyboard.isDown('space', 'rctrl', 'lctrl') and canShoot then
+    if love.keyboard.isDown('space', 'rctrl', 'lctrl') and canShoot then
         newBullet = { x = player.x + (player.img:getWidth()/2), y = player.y, img = bulletImg }
         table.insert(bullets, newBullet)
         canShoot = false
         canShootTimer = canShootTimerMax
     end
+
+    createEnnemyTimer = createEnnemyTimer - (1 * dt)
+    if createEnnemyTimer < 0 then
+        createEnnemyTimer = createEnnemyTimerMax
+
+        randomNumber = math.random(10, love.graphics.getWidth() - 10)
+        newEnnemy = { x = randomNumber, y = -10, img = enemyImg }
+        table.insert(enemies, newEnnemy)
+    end
+
+    for i, bullet in ipairs(bullets) do
+        bullet.y = bulllet.y - (250 * dt)
+        if bullet.y < 0 then
+            table.remove(bullets, i)
+        end
+    end
+
+    for i, enemy in ipairs(enemies) do
+        enemy.y = enemy.y + (200 * dt)
+
+        if enemy.y > 850 then
+            table.remove(enemies, i)
+        end
+    end
+
+    for i, enemy in ipairs(enemies) do
+        for j, bullet in ipairs(bullets) do
+            if CheckCollision(enemy.x, enemy.y, enemy.img:getWidth(), enemy.img:getHeight(), bullet.x, bullet.y, bullet.img:getWidth(), bullet.img:getHeight()) then
+                table.remove(bullets, j)
+                table.remove(enemies, i)
+                score = score + 1
+            end
+        end
+        
+        if CheckCollision(enemy.x, enemy.y, enemy.img:getWidth(), enemy.img:getHeight(), player.x, player.y, player.img:getWidth(), player.img:getHeight()) and isAlive then
+            table.remove(enemies, i)
+            isAlive = false
+        end
+    end
 end
 
 function love.draw(dt)
     love.graphics.draw(player.img, player.x, player.y)
+    
+    for i, bullet in ipairs(bullets) do
+        love.graphics.draw(bullet.img, bullet.x, bullet.y)
+    end
+
+    for i, enemy in ipairs(enemies) do
+        love.graphics.draw(enemy.img, enemy.x, enemy.y)
+    end
 end
