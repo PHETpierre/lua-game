@@ -94,10 +94,27 @@ function love.update(dt)
             isAlive = false
         end
     end
+
+    if not isAlive and love.keyboard.isDown('r') then
+        bullet = {}
+        enemies = {}
+        canShootTimer = canShootTimerMax
+        createEnnemyTimer = createEnnemyTimerMax
+
+        player.x = 50
+        player.y = 710 
+
+        score = 0
+        isAlive = true
+    end
 end
 
 function love.draw(dt)
-    love.graphics.draw(player.img, player.x, player.y)
+    if isAlive then
+        love.graphics.draw(player.img, player.x, player.y)
+    else
+        love.graphics.print("Press 'R' to restart", love.graphics:getWidth()/2-50, love.graphics:getHeight()/2-10)
+    end
     
     for i, bullet in ipairs(bullets) do
         love.graphics.draw(bullet.img, bullet.x, bullet.y)
